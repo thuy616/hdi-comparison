@@ -1,0 +1,16 @@
+.axis--x path {
+  color: #c1c1c1;
+}
+.axis--y path {
+  color: #c1c1c1;
+}
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+select {
+  width: 200px;
+}

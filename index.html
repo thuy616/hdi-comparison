@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="./style.css">
+  <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.7.3/d3.min.js"></script>
+  <script src="https://d3js.org/d3-array.v1.min.js"></script>
+</head>
+<body>
+  <div class="row">
+    <div class="col-xs-12 col-md-6 text-center">
+      <label>Country 1: </label>
+      <select id="country1">
+      </select>
+    </div>
+    <div class="col-xs-12 col-md-6 text-center">
+      <label>Country 2: </label>
+      <select id="country2">
+      </select>
+    </div>
+  </div>
+  <svg width="960" height="500"></svg>
+<script>
+
+var data = null;
+
+function initialize() {
+  d3.json("hdi.json", function(error, rawData) {
+    if (error) throw error;
+
+    data = rawData;
+    selectDefaultCountries(rawData);
+    drawHDI(data);
+  });
+}
+
+function selectDefaultCountries(data) {
+  _.each(data, c => {
+    var option1 = document.createElement("option");
+    option1.text = c.country;
+    document.getElementById("country1").options.add(option1);
+    if (c.country === 'United States') {
+      $("#country1").val(c.country);
+    }
+    var option2 = document.createElement("option");
+    option2.text = c.country;
+    document.getElementById("country2").options.add(option2);
+    if (c.country === 'China') {
+      $("#country2").val(c.country);
+    }
+  });
+}
+
+function drawHDI(data) {
+  var country1 = $("#country1").val();
+  var country2 = $("#country2").val();
+  console.log('country1', country1);
+  var svg = d3.select("svg"),
+      margin = {top: 20, right: 80, bottom: 30, left: 50},
+      width = svg.attr("width") - margin.left - margin.right,
+      height = svg.attr("height") - margin.top - margin.bottom,
+      g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  var parseTime = d3.timeParse("%Y");
+
+  var x = d3.scaleTime().range([0, width]),
+      y = d3.scaleLinear().range([height, 0]),
+      z = d3.scaleOrdinal(d3.schemeCategory10);
+
+  // define each country's line
+  var line = d3.line()
+      .defined(function(d) {
+        return d.HDI!=null; // breaks for missing data points
+      })
+      .curve(d3.curveBasis)
+      .x(function(d) { return x(d.year); })
+      .y(function(d) { return y(d.HDI); });
+
+    // console.log("data:", data);
+    // format data
+    let countries = [];
+    _.map(data, c => {
+      if (c.country === country1 || c.country === country2) {
+        let countryItem = {
+          id: c.country,
+          values: []
+        }
+        delete c.country;
+        _.each(c, (value, key) => {
+          let v = value ? value : null;
+          countryItem.values.push({ "year": parseTime(key), "HDI": v});
+        });
+        countries.push(countryItem);
+      }
+    });
+
+  console.log('countries: ',countries);
+
+  let years = [];
+  _.each(data[0], (value, key) => {
+    if (key!=="country") years.push(parseTime(key));
+  });
+
+  var max = d3.max(countries, function(c) { return d3.max(c.values, function(d) { if (d.HDI) {return d.HDI} else return }); });
+  var min = d3.min(countries, function(c) { return d3.min(c.values, function(d) { if (d.HDI) {return d.HDI} else return }); });
+
+  x.domain(d3.extent(years));
+  y.domain([0, 1]);
+  z.domain(countries.map(function(c) { return c.id; }));
+
+  g.append("g")
+      .attr("class", "axis axis--x")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+
+
+  g.append("g")
+      .attr("class", "axis axis--y")
+      .call(d3.axisLeft(y))
+      .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 0.1)
+      .attr("dy", "0.71em")
+      .attr("fill", "#a1a1a1")
+      .text("Human Development Index");
+
+      var country = g.selectAll(".country")
+        .data(countries)
+        .enter().append("g")
+        .attr("class", "country");
+
+      country.append("path")
+          .attr("class", "line")
+          .attr("d", function(d) { return line(d.values); })
+          .style("stroke", function(d) { return z(d.id); });
+
+      country.append("text")
+          .datum(function(d) { return {id: d.id, value: d.values[d.values.length - 1]}; })
+          .attr("transform", function(d) {
+            console.log("***", d.value.year);
+            return "translate(" + x(d.value.year) + "," + y(d.value.HDI) + ")";
+          })
+          .attr("x", 3)
+          .attr("dy", "0.35em")
+          .style("font", "10px sans-serif")
+          .text(function(d) { return d.id; });
+}
+
+initialize();
+
+</script>
+</body>
+
+</html>
