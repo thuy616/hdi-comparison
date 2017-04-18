@@ -12,13 +12,13 @@
 </head>
 <body>
   <div class="row">
-    <div class="col-xs-12 col-md-6 text-center">
-      <label>Country 1: </label>
+    <div class="col-xs-12 col-md-4 col-lg-3 text-center">
+      <label style="color:rgb(31, 119, 180)">Country 1: </label>
       <select id="country1">
       </select>
     </div>
-    <div class="col-xs-12 col-md-6 text-center">
-      <label>Country 2: </label>
+    <div class="col-xs-12 col-md-4 col-lg-3 text-center">
+      <label style="color:rgb(255, 127, 14)">Country 2: </label>
       <select id="country2">
       </select>
     </div>
@@ -59,6 +59,7 @@ function drawHDI(data) {
   var country1 = $("#country1").val();
   var country2 = $("#country2").val();
   console.log('country1', country1);
+  console.log('country2', country2);
   var svg = d3.select("svg"),
       margin = {top: 20, right: 80, bottom: 30, left: 50},
       width = svg.attr("width") - margin.left - margin.right,
@@ -80,30 +81,39 @@ function drawHDI(data) {
       .x(function(d) { return x(d.year); })
       .y(function(d) { return y(d.HDI); });
 
-    // console.log("data:", data);
-    // format data
+    let years = [];
+    _.each(data[0], (value, key) => {
+      if (key!=="country") years.push(parseTime(key));
+    });
+
     let countries = [];
-    _.map(data, c => {
-      if (c.country === country1 || c.country === country2) {
+    let orderedCountries = {};
+    const dataClone = _.cloneDeep(data);
+    _.each(dataClone, c => {
+      if (c.country == country1 || c.country == country2) {
         let countryItem = {
           id: c.country,
           values: []
-        }
+        };
         delete c.country;
         _.each(c, (value, key) => {
           let v = value ? value : null;
           countryItem.values.push({ "year": parseTime(key), "HDI": v});
         });
-        countries.push(countryItem);
+        if (countryItem.id == country1) {
+          orderedCountries["1"] = countryItem;
+        } else {
+          orderedCountries["2"] = countryItem;
+        }
       }
     });
 
+  countries.push(orderedCountries["1"]);
+  countries.push(orderedCountries["2"]);
+
   console.log('countries: ',countries);
 
-  let years = [];
-  _.each(data[0], (value, key) => {
-    if (key!=="country") years.push(parseTime(key));
-  });
+
 
   var max = d3.max(countries, function(c) { return d3.max(c.values, function(d) { if (d.HDI) {return d.HDI} else return }); });
   var min = d3.min(countries, function(c) { return d3.min(c.values, function(d) { if (d.HDI) {return d.HDI} else return }); });
@@ -151,6 +161,19 @@ function drawHDI(data) {
 }
 
 initialize();
+$("#country1").change(function() {
+  console.log('country1 value changed');
+  var svg = d3.select("svg");
+  svg.selectAll("*").remove();
+  drawHDI(data);
+});
+
+$("#country2").change(function() {
+  console.log("country2 value changed");
+  var svg = d3.select("svg");
+  svg.selectAll("*").remove();
+  drawHDI(data);
+});
 
 </script>
 </body>
