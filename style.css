@@ -13,13 +13,11 @@ html, body {
     margin-top: 40px;
   }
 }
-
-.dark-color {
-  color: #a0a0a0;
+.text-small {
+  font-size: 11px;
 }
-
 .light-color {
-  color: #c2c2c2;
+  color: #a2a2a2;
 }
 
 .country-selector {
@@ -47,12 +45,15 @@ html, body {
   }
 }
 
-
 .axis--x path {
-  color: #c1c1c1;
+  color: #a2a2a2;
 }
 .axis--y path {
-  color: #c1c1c1;
+  color: #a2a2a2;
+}
+
+.negative-index {
+  color: #CF000F;
 }
 
 .line {
@@ -73,12 +74,13 @@ select {
   margin: 50px 20px;
 }
 
-.small-multiple-container h1,h2,h3,h4,h5 {
-  text-align: center;
-  font-weight: 300;
+.small-multiple-container h5 {
+  margin-left: 40px;
+  font-weight: 400;
 }
 
 .small-multiple-container {
+  margin: 20px 0;
   height: 150px;
 }
 @media (min-width: 768px) {
@@ -120,9 +122,9 @@ select {
   font-weight: 400;
 }
 .small-multiple-container text.value {
-  font-size: 100%;
-  fill: white;
-  font-weight: 400;
+  font-size: 80%;
+  fill: #fff;
+  font-weight: 300;
 }
 
 .small-multiple-container .axisHorizontal path{
@@ -137,4 +139,22 @@ select {
 .small-multiple-container g.bar {
   /*fill: steelblue;*/
   fill-opacity: .9;
+}
+.subtext {
+  margin: 0;
+  padding: 0;
+  font-size: 9px;
+  color: #CF000F;
+}
+.footer {
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+  height: 30px;
+  margin: 0 !important;
+  background-color: #d2d2d2;
+}
+
+.footer p {
+  margin-top: 10px;
 }

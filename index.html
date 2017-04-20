@@ -16,11 +16,14 @@
 <body>
     <div class="row header">
         <div class="col-xs-12 col-sm-6 col-sm-offset-3">
-          <h2 class="text-center dark-color">HDI Comparison</h2>
+          <h2 class="text-center">HDI Comparison</h2>
           <p class="text-center light-color">
             The Human Development Index (HDI) is a composite statistic of life expectancy, education, and per capita income indicators, which are used to rank countries into four tiers of human development.
             <br/>
             If you consider relocating to another country, this website will help you make a better decision.
+            <br/>
+            <span class="text-small">2015 data from <a target="_blank" href="http://hdr.undp.org/en/data">http://hdr.undp.org/en/data</a></span>
+          </br/>
           </p>
         </div>
         <div class="country-selector">
@@ -54,7 +57,30 @@
         <div id="edu-container" class="small-multiple-container col-sm-6 col-xs-12">
           <h5>Mean Years of Schooling (Years)</h5>
         </div>
+        <div id="health-container" class="small-multiple-container col-sm-6 col-xs-12">
+          <h5>Public Health Expenditure (% of GDP)</h5>
+        </div>
+        <div id="internet-container" class="small-multiple-container col-sm-6 col-xs-12">
+          <h5>Intenet Users (% of Population)</h5>
+        </div>
+        <div id="unempl-container" class="small-multiple-container col-sm-6 col-xs-12">
+          <h5>
+            <span class="negative-index">Total Unemployment Rate (% of Labor Force)</span>
+            <br/><span class="subtext">* Negative impact on HDI</span>
+          </h5>
+        </div>
+        <div id="gender-container" class="small-multiple-container col-sm-6 col-xs-12">
+          <h5>
+            <span class="negative-index">Gender Inequality Index (GII)</span>
+            <br/><span class="subtext">* Negative impact on HDI</span>
+          </h5>
+        </div>
     </section>
+    <div class="footer text-center">
+      <p>
+        Created by Thuy N. @ <a href="http:thuyn.me">http://thuyn.me</a>
+      </p>
+    </div>
 
     <script>
         var d3json = Promise.promisify(d3.json);
@@ -64,7 +90,7 @@
         var internetData = null;
         var healthexpData = null;
         var unemplData = null;
-        var co2Data = null;
+        var genderData = null;
 
         function initialize() {
             d3json("hdi.json")
@@ -76,12 +102,35 @@
                 .then(() => d3json("gni2015.json"))
                 .then(data => {
                     gniData = data;
-                    drawSmallMultiple(gniData, '#gni-container', '$');
+                    drawSmallMultiple({raw: gniData, containerId: '#gni-container', unit: '$'});
                 })
                 .then(() => d3json("avgyearsschooling.json"))
                 .then(data => {
                     eduData = data;
-                    drawSmallMultiple(eduData, '#edu-container', 'years');
+                    drawSmallMultiple({raw: eduData, containerId: '#edu-container', unit: 'years'});
+                })
+                .then(() => d3json("healthexpenditure.json"))
+                .then(data => {
+                    healthexpData = data;
+                    drawSmallMultiple({raw: healthexpData, containerId: "#health-container", unit: '%GDP'});
+                })
+                .then(() => d3json("internet2015.json"))
+                .then(data => {
+                    internetData = data;
+                    drawSmallMultiple({raw: internetData, containerId: "#internet-container", unit: "%"});
+                })
+                .then(() => d3json("unemplrate.json"))
+                .then(data => {
+                    unemplData = data;
+                    drawSmallMultiple({raw: unemplData, containerId: "#unempl-container", unit: "%"});
+                })
+                .then(() => d3json("genderinequal.json"))
+                .then(data => {
+                    genderData = data;
+                    drawSmallMultiple({raw: genderData, containerId: "#gender-container", unit: ""});
+                })
+                .catch(err => {
+                  if (err) console.error(err);
                 })
         }
 
@@ -173,21 +222,6 @@
             countries.push(orderedCountries["1"]);
             countries.push(orderedCountries["2"]);
 
-            var max = d3.max(countries, function(c) {
-                return d3.max(c.values, function(d) {
-                    if (d.HDI) {
-                        return d.HDI
-                    } else return
-                });
-            });
-            var min = d3.min(countries, function(c) {
-                return d3.min(c.values, function(d) {
-                    if (d.HDI) {
-                        return d.HDI
-                    } else return
-                });
-            });
-
             x.domain(d3.extent(years));
             y.domain([0, 1]);
             z.domain(countries.map(function(c) {
@@ -242,7 +276,7 @@
                 });
         }
 
-        function drawSmallMultiple(raw, containerId, unit) {
+        function drawSmallMultiple({raw, containerId, unit}) {
             var country1 = $("#country1").val();
             var country2 = $("#country2").val();
             var data = [];
@@ -266,7 +300,7 @@
             z.domain(data.map(d => {
                 return d.label;
             }));
-            var max = d3.max(data, function(d) {
+            var max = d3.max(raw, function(d) {
                 return d.value;
             });
             svg = d3.select(containerId)
@@ -348,8 +382,18 @@
           drawHDI(hdiData);
           d3.select("#gni-container svg").remove();
           d3.select("#edu-container svg").remove();
-          drawSmallMultiple(gniData, '#gni-container', '$');
-          drawSmallMultiple(eduData, '#edu-container', 'years');
+          d3.select("#health-container svg").remove();
+          d3.select("#internet-container svg").remove();
+          d3.select("#unempl-container svg").remove();
+          d3.select("#gender-container svg").remove();
+
+          drawSmallMultiple({raw: gniData, containerId: '#gni-container', unit: '$'});
+          drawSmallMultiple({raw: eduData, containerId: '#edu-container', unit: 'years'});
+          drawSmallMultiple({raw: healthexpData, containerId: "#health-container", unit: '%GDP'});
+          drawSmallMultiple({raw: internetData, containerId: "#internet-container", unit: "%"});
+          drawSmallMultiple({raw: unemplData, containerId: "#unempl-container", unit: "%"});
+          drawSmallMultiple({raw: genderData, containerId: "#gender-container", unit: ""});
+
         }
 
         initialize();
