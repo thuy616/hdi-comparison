@@ -5,6 +5,32 @@ html, body {
  overflow: scroll;
 }
 
+.country-selector {
+  margin: 30px 0;
+}
+
+.hdi-container {
+  margin: 0 auto;
+  max-width: 900px;
+  width: 100%;
+  height: 300px;
+}
+@media (min-width: 768px) {
+  .hdi-container {
+    max-width: 900px;
+    width: 100%;
+    height: 350px;
+  }
+}
+@media (min-width: 1024px) {
+  .hdi-container {
+    max-width: 900px;
+    width: 100%;
+    height: 400px;
+  }
+}
+
+
 .axis--x path {
   color: #c1c1c1;
 }

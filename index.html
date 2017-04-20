@@ -15,28 +15,43 @@
 
 <body>
     <div class="row">
-        <div class="col-xs-12 col-md-4 col-lg-3 text-center">
-            <label style="color:rgb(31, 119, 180)">Country 1: </label>
-            <select id="country1">
-      </select>
-        </div>
-        <div class="col-xs-12 col-md-4 col-lg-3 text-center">
-            <label style="color:rgb(255, 127, 14)">Country 2: </label>
-            <select id="country2">
-      </select>
+        <h2 class="text-center">HDI Comparison</h2>
+        <p class="text-center">
+
+        </p>
+        <div class="country-selector">
+          <div class="col-xs-12 col-sm-offset-2 col-sm-4 col-md-offset-3 col-md-3">
+            <div class="text-center">
+              <label style="color:rgb(31, 119, 180)">Country 1: </label>
+              <select id="country1"></select>
+            </div>
+
+          </div>
+          <div class="col-xs-12 col-sm-4 col-md-3">
+            <div class="text-center">
+              <label style="color:rgb(255, 127, 14)">Country 2: </label>
+              <select id="country2"></select>
+            </div>
+
+          </div>
         </div>
     </div>
-    <div class="hdi-container">
-        <svg id="hdi" width="960" height="500"></svg>
-    </div>
-    <div class="small-multiples" class="row">
+
+    <section class="hdi-container-wrapper">
+      <div id="hdi-container" class="hdi-container">
+          <svg id="hdi"></svg>
+      </div>
+    </section>
+
+    <section class="small-multiples" class="row">
         <div id="gni-container" class="small-multiple-container col-sm-6 col-xs-12">
           <h5>Gross national income (GNI) per capita (PPP$)</h5>
         </div>
         <div id="edu-container" class="small-multiple-container col-sm-6 col-xs-12">
           <h5>Mean Years of Schooling (Years)</h5>
         </div>
-    </div>
+    </section>
+
     <script>
         var d3json = Promise.promisify(d3.json);
         var hdiData = null;
@@ -79,18 +94,23 @@
         }
 
         function drawHDI(data) {
-            var country1 = $("#country1").val();
-            var country2 = $("#country2").val();
-            var svg = d3.select("#hdi"),
-                margin = {
-                    top: 20,
-                    right: 80,
-                    bottom: 30,
-                    left: 50
-                },
-                width = svg.attr("width") - margin.left - margin.right,
-                height = svg.attr("height") - margin.top - margin.bottom,
-                g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            var country1 = $("#country1").val(),
+            country2 = $("#country2").val(),
+            w = $("#hdi-container").width(),
+            h = $("#hdi-container").height();
+            svg = d3.select("#hdi"),
+            margin = {
+                top: 20,
+                right: 80,
+                bottom: 30,
+                left: 50
+            },
+            width = w - margin.left - margin.right,
+            height = h - margin.top - margin.bottom,
+            g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+            svg.attr("width", w).attr("height", h);
 
             var parseTime = d3.timeParse("%Y");
 
@@ -164,7 +184,6 @@
             z.domain(countries.map(function(c) {
                 return c.id;
             }));
-            console.log("hdi z", z);
 
             g.append("g")
                 .attr("class", "axis axis--x")
@@ -204,7 +223,6 @@
                     };
                 })
                 .attr("transform", function(d) {
-                    console.log("***", d.value.year);
                     return "translate(" + x(d.value.year) + "," + y(d.value.HDI) + ")";
                 })
                 .attr("x", 3)
@@ -225,7 +243,6 @@
             data.push(_.find(raw, {
                 'label': country2
             }));
-            console.log('selectedData', data);
             var div = d3.select("#gni-container").append("div").attr("class", "toolTip");
 
             var axisMargin = 20,
@@ -240,11 +257,9 @@
             z.domain(data.map(d => {
                 return d.label;
             }));
-            console.log("gni z", z);
             var max = d3.max(data, function(d) {
                 return d.value;
             });
-            console.log("Max gni:", max);
             svg = d3.select('#gni-container')
                 .append("svg")
                 .attr("width", width)
@@ -320,17 +335,20 @@
 
         initialize();
         $("#country1").change(function() {
-            console.log('country1 value changed');
+            // clear hdi svg;
             var svg = d3.select("svg");
             svg.selectAll("*").remove();
             drawHDI(hdiData);
+            d3.select("#gni-container svg").remove();
+            drawGNI(gniData);
         });
 
         $("#country2").change(function() {
-            console.log("country2 value changed");
             var svg = d3.select("svg");
             svg.selectAll("*").remove();
             drawHDI(hdiData);
+            d3.select("#gni-container svg").remove();
+            drawGNI(gniData);
         });
     </script>
 </body>
