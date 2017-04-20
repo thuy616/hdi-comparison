@@ -1,3 +1,10 @@
+html, body {
+ width: 100%;
+ display: block;
+ position: relative;
+ overflow: scroll;
+}
+
 .axis--x path {
   color: #c1c1c1;
 }
@@ -13,4 +20,76 @@
 
 select {
   width: 200px;
+}
+
+.hdi-container svg {
+  position: center;
+}
+
+.small-multiples {
+  margin: 50px 20px;
+}
+
+.small-multiple-container h1,h2,h3,h4,h5 {
+  text-align: center;
+  font-weight: 300;
+}
+
+.small-multiple-container {
+  height: 150px;
+}
+@media (min-width: 768px) {
+  .small-multiple-container {
+    height: 200px;
+  }
+}
+@media (min-width: 1024px) {
+  .small-multiple-container {
+    height: 250px;
+  }
+}
+
+.small-multiples svg {
+  width: 100%;
+  height: 100%;
+  position: center;
+}
+
+.toolTip {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  position: absolute;
+  display: none;
+  width: auto;
+  height: auto;
+  background: none repeat scroll 0 0 white;
+  border: 0 none;
+  border-radius: 8px 8px 8px 8px;
+  box-shadow: -3px 3px 15px #888888;
+  color: black;
+  font: 12px sans-serif;
+  padding: 5px;
+  text-align: center;
+}
+
+.small-multiple-container text {
+  font: 10px sans-serif;
+  color: white;
+}
+.small-multiple-container text.value {
+  font-size: 120%;
+  fill: white;
+}
+
+.small-multiple-container .axisHorizontal path{
+  fill: none;
+}
+
+.small-multiple-container .axisHorizontal .tick line {
+  stroke-width: 1;
+  stroke: rgba(0, 0, 0, 0.2);
+}
+
+.small-multiple-container g.bar {
+  /*fill: steelblue;*/
+  fill-opacity: .9;
 }
