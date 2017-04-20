@@ -14,11 +14,15 @@
 </head>
 
 <body>
-    <div class="row">
-        <h2 class="text-center">HDI Comparison</h2>
-        <p class="text-center">
-
-        </p>
+    <div class="row header">
+        <div class="col-xs-12 col-sm-6 col-sm-offset-3">
+          <h2 class="text-center dark-color">HDI Comparison</h2>
+          <p class="text-center light-color">
+            The Human Development Index (HDI) is a composite statistic of life expectancy, education, and per capita income indicators, which are used to rank countries into four tiers of human development.
+            <br/>
+            If you consider relocating to another country, this website will help you make a better decision.
+          </p>
+        </div>
         <div class="country-selector">
           <div class="col-xs-12 col-sm-offset-2 col-sm-4 col-md-offset-3 col-md-3">
             <div class="text-center">
@@ -72,7 +76,12 @@
                 .then(() => d3json("gni2015.json"))
                 .then(data => {
                     gniData = data;
-                    drawGNI(gniData);
+                    drawSmallMultiple(gniData, '#gni-container', '$');
+                })
+                .then(() => d3json("avgyearsschooling.json"))
+                .then(data => {
+                    eduData = data;
+                    drawSmallMultiple(eduData, '#edu-container', 'years');
                 })
         }
 
@@ -233,7 +242,7 @@
                 });
         }
 
-        function drawGNI(raw) {
+        function drawSmallMultiple(raw, containerId, unit) {
             var country1 = $("#country1").val();
             var country2 = $("#country2").val();
             var data = [];
@@ -243,13 +252,13 @@
             data.push(_.find(raw, {
                 'label': country2
             }));
-            var div = d3.select("#gni-container").append("div").attr("class", "toolTip");
+            var div = d3.select(containerId).append("div").attr("class", "toolTip");
 
             var axisMargin = 20,
                 margin = 40,
                 valueMargin = 4,
-                width = parseInt(d3.select('#gni-container').style('width'), 10),
-                height = parseInt(d3.select('#gni-container').style('height'), 10),
+                width = parseInt(d3.select(containerId).style('width'), 10),
+                height = parseInt(d3.select(containerId).style('height'), 10),
                 barHeight = (height - axisMargin - margin * 2) * 0.4 / data.length,
                 barPadding = (height - axisMargin - margin * 2) * 0.6 / data.length,
                 data, bar, svg, scale, xAxis, labelWidth = 0;
@@ -260,7 +269,7 @@
             var max = d3.max(data, function(d) {
                 return d.value;
             });
-            svg = d3.select('#gni-container')
+            svg = d3.select(containerId)
                 .append("svg")
                 .attr("width", width)
                 .attr("height", height);
@@ -310,7 +319,7 @@
                 .attr("dy", ".35em") //vertical align middle
                 .attr("text-anchor", "end")
                 .text(function(d) {
-                    return (d.value + "$");
+                    return (d.value + " " + unit);
                 })
                 .attr("x", function(d) {
                     var width = this.getBBox().width;
@@ -333,23 +342,20 @@
                 .call(xAxis);
         }
 
-        initialize();
-        $("#country1").change(function() {
-            // clear hdi svg;
-            var svg = d3.select("svg");
-            svg.selectAll("*").remove();
-            drawHDI(hdiData);
-            d3.select("#gni-container svg").remove();
-            drawGNI(gniData);
-        });
+        function onCountryChange() {
+          var svg = d3.select("svg");
+          svg.selectAll("*").remove();
+          drawHDI(hdiData);
+          d3.select("#gni-container svg").remove();
+          d3.select("#edu-container svg").remove();
+          drawSmallMultiple(gniData, '#gni-container', '$');
+          drawSmallMultiple(eduData, '#edu-container', 'years');
+        }
 
-        $("#country2").change(function() {
-            var svg = d3.select("svg");
-            svg.selectAll("*").remove();
-            drawHDI(hdiData);
-            d3.select("#gni-container svg").remove();
-            drawGNI(gniData);
-        });
+        initialize();
+        $("#country1").change(() => onCountryChange());
+        $("#country2").change(() => onCountryChange());
+
     </script>
 </body>
 
