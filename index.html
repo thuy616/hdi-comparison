@@ -9,6 +9,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.7.3/d3.min.js"></script>
   <script src="https://d3js.org/d3-array.v1.min.js"></script>
+  <script src="bluebird.min.js"></script>
 </head>
 <body>
   <div class="row">
@@ -26,15 +27,20 @@
   <svg width="960" height="500"></svg>
 <script>
 
-var data = null;
+var d3Json = Promise.promisify(d3.json);
+var hdiData = null;
+var gniData = null;
+var eduData = null;
+var internetData = null;
+
 
 function initialize() {
-  d3.json("hdi.json", function(error, rawData) {
-    if (error) throw error;
-
-    data = rawData;
-    selectDefaultCountries(rawData);
-    drawHDI(data);
+  d3Json("hdi.json")
+  .then(data => {
+    hdiData = data;
+    selectDefaultCountries(hdiData);
+    drawHDI(hdiData);
+    return;
   });
 }
 
@@ -165,14 +171,14 @@ $("#country1").change(function() {
   console.log('country1 value changed');
   var svg = d3.select("svg");
   svg.selectAll("*").remove();
-  drawHDI(data);
+  drawHDI(hdiData);
 });
 
 $("#country2").change(function() {
   console.log("country2 value changed");
   var svg = d3.select("svg");
   svg.selectAll("*").remove();
-  drawHDI(data);
+  drawHDI(hdiData);
 });
 
 </script>
